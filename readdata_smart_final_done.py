@@ -18,6 +18,8 @@ import signal
 
 from collections import defaultdict
 
+import requests
+
 TK_SILENCE_DEPRECATION=1
 
 
@@ -66,6 +68,20 @@ while not fieldValues:
 if fieldValues.split(".")[-1] not in formats:
 
     fieldValues =  fieldValues+".csv"
+
+
+
+msg = "Enter your name"
+
+title = " Logger"
+
+userNames = []
+
+userValues = []  # we start with blanks for the values
+
+while not userValues:
+
+    userValues = easygui.enterbox(msg,title, userNames)
 
 
 
@@ -188,7 +204,7 @@ forwardCounter = 0
 
 backwardCounter = length
 
-nominalList = nominal
+nominalList = [float(a) for a in nominal]
 
 print(nominalList)
 
@@ -197,6 +213,24 @@ numericalGraduation = float(graduation.split()[0])
 
 
 start = time.time()
+
+
+def telegram_bot_sendtext(bot_message):
+
+    bot_token = '1160447906:AAGW_vMlTG45GH90IHYoUL0K5p1X-0ulI_s'
+    bot_chatID = '714757931'
+    send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + bot_chatID + '&parse_mode=Markdown&text=' + bot_message
+
+    response = requests.get(send_text)
+
+    return response.json()
+
+
+def report(duration):
+    my_balance = 10   ## Replace this number with an API call to fetch your account balance
+    my_message = "The task is completed by "+str(userValues)+" in: "+str(duration)[:5] +" minutes"   ## Customize your message
+    telegram_bot_sendtext(my_message)
+
 
 
 def toggle():
@@ -322,7 +356,7 @@ def quit():
                     data_writer.writerow([n,x,y])
 
             print("Total time taken for measurement is {0:0.1f} minutes".format((time.time() - start)/60.0))
-
+            report((time.time() - start)/60.0)
             exit(0)
 
         except:
@@ -344,7 +378,7 @@ def quit():
             # print("Something wrong, fail to save data")
 
             print("Total time taken for measurement is {0:0.1f} minutes".format((time.time() - start)/60.0))
-
+            report((time.time() - start)/60.0)
             exit(0)
 
 
@@ -369,6 +403,7 @@ def quit():
 
         if easygui.ccbox(cmsg, title):     # show a Continue/Cancel dialog
             print("Total time taken for measurement is {0:0.1f} minutes".format((time.time() - start)/60.0))
+            report((time.time() - start)/60.0)
             exit(0)
 
         else:  # user chose Cancel
@@ -405,6 +440,7 @@ def quit():
 
         if easygui.ccbox(cmsg, title):     # show a Continue/Cancel dialog
             print("Total time taken for measurement is {0:0.1f} minutes".format((time.time() - start)/60.0))
+            report((time.time() - start)/60.0)
             exit(0)
 
         else:  # user chose Cancel
